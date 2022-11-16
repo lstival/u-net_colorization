@@ -1,24 +1,19 @@
 # Default imporations
-import torch
 from torch import nn
-import torch.nn.functional
 from torch.nn import Dropout, Softmax, Linear, LayerNorm, Conv2d
-import math
-import copy
-import os
 
 # Import network classes
 from encoder import *
 from vit import *
 
 class ViT_UNet(nn.Module):
-    def __init__(self, img_size=(512, 768)):
+    def __init__(self, img_size=(512, 768), in_ch=3):
         super().__init__()
 
         self.pooling = nn.MaxPool2d(kernel_size=2)
         self.upsample = nn.Upsample(scale_factor=2)
 
-        self.conv1_1 = CNNencoder_gn(3, 16)
+        self.conv1_1 = CNNencoder_gn(in_ch, 16)
         self.conv1_2 = CNNencoder_gn(16, 16)
         self.conv2_1 = CNNencoder_gn(16, 32)
         self.conv2_2 = CNNencoder_gn(32, 32)
@@ -42,7 +37,8 @@ class ViT_UNet(nn.Module):
         self.concat5 = Concat_ln(32, 23)
         self.convup5 = CNNencoder_ln(23, 23)
 
-        self.Segmentation_head = nn.Conv2d(23, 23, kernel_size=1, stride=1, bias=False)
+        self.Segmentation_head = nn.Conv2d(23, 3, kernel_size=1, stride=1, bias=False)
+        self.sigmoid = nn.Sigmoid()
 
 
     def forward(self, x):
@@ -69,6 +65,7 @@ class ViT_UNet(nn.Module):
         # (B, 128, 32, 48)
         c5 = self.conv5_1(p4)
         c5 = self.conv5_2(c5)
+        # print(c5.shape)
         # (B, 256, 32, 48)
         v = self.vit(c5)
         # (B, 256, 16, 24)
@@ -99,3 +96,7 @@ class ViT_UNet(nn.Module):
         # (B, 23, 512, 768)
         out = self.Segmentation_head(u5)
         # (B, 23, 512, 768)
+
+        sig = self.sigmoid(out)
+
+        return sig

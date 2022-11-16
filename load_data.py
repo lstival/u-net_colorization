@@ -49,7 +49,7 @@ class ReadData():
         as result a Data Loader as created and returned:
 
         dataroot: Path to the images
-        Image_size: Dimension of the images (Images must by a sauqre)
+        Image_size: Dimension of the images (Default 512,768)
         shuffle: Define if the samples will be ordem randomized (Default: True)
         batch_size: Number the samples for batch (Default: 2)
 
@@ -57,11 +57,11 @@ class ReadData():
         dataset = dset.ImageFolder(root=dataroot,
                                 transform=transforms.Compose([
                                         transforms.Resize(image_size),
-                                        transforms.CenterCrop(image_size),
+                                        # transforms.CenterCrop(image_size),
                                         #convert RGB image to LAB
                                         transforms.Lambda(lambda x: color_trans.rgb2lab(x)),
                                         transforms.ToTensor(),
-                                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                                        # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                                 ]))
         # Create the dataloader
         self.dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,

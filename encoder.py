@@ -3,9 +3,6 @@
 import torch
 from torch import nn
 import torch.nn.functional
-from torch.nn import Dropout, Softmax, Linear, LayerNorm, Conv2d
-import math
-import copy
 import os
 
 # Cuda Devices avalibles

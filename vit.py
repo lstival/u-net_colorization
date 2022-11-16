@@ -36,7 +36,6 @@ class Embeddings(nn.Module):
         x = x.transpose(-1, -2)  # (B, n_patches, hidden)
         # (B, 384, 768)
         position_embeddings = self.position_embeddings
-        print(self.position_embeddings.shape)
         # position_embeddings = (B, 384, 768)
         embeddings = x + position_embeddings
         # (B, 384, 768)

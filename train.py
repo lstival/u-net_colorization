@@ -1,31 +1,62 @@
 
 # Load the DataSet
 import load_data as ld
+import torch
+# _______________________________
+####### Train
 
-dataLoader = ld.ReadData()
-
-# Spatial size of training images. All images will be resized to this
-image_size = 256
-
-# Batch size during training
-batch_size = 5
-
-# Root directory for dataset
-dataroot = "../data/train/initial_argument"
-
-dataloader = dataLoader.create_dataLoader(dataroot, image_size)
-
-#Example image
-img_example = dataLoader.img_example(dataloader)
-img_example
-print(f"sucess dataloader: {img_example.size}")
+def get_lr(optimizer):
+    for param_group in optimizer.param_groups:
+        return param_group['lr']
 
 
-# instance the model
-import encoder as enc
-import model as mdl
+import time
+import os
+from tqdm import tqdm
 
-# model = enc.Enconder()
-model = mdl.ViT_UNet()
-print(type(model))
-print(model(next(iter(dataloader))[0]).shape)
+def fit(epochs, model, train_loader, criterion, optimizer, scheduler, patch=False, device="cpu"):
+
+    lrs = []
+    train_losses = []
+    model.to(device)
+    fit_time = time.time()
+
+    for e in range(epochs):
+        since = time.time()
+        running_loss = 0
+
+        # training loop
+        model.train()
+        for i, data in enumerate(tqdm(train_loader)):
+            # training phase
+            img, _ = data
+            img_gray = img[:,:1,:,:]
+
+            # forward
+            output = model(img_gray)
+            loss = criterion(output, img)
+
+            # backward
+            loss.backward()
+            optimizer.step()  # update weight
+            optimizer.zero_grad()  # reset gradient
+
+            # step the learning rate
+            lrs.append(get_lr(optimizer))
+            scheduler.step()
+
+            running_loss += loss.item()
+
+            
+            # iou
+
+            print("Epoch:{}/{}..".format(e + 1, epochs),
+                  "Train Loss: {:.3f}..".format(running_loss / len(train_loader)),
+                  "Time: {:.2f}m".format((time.time() - since) / 60))
+
+    train_losses.append(running_loss / len(train_loader))
+    history = {'train_loss': train_losses,
+               'lrs': lrs}
+
+    print('Total time: {:.2f} m'.format((time.time() - fit_time) / 60))
+    return history
