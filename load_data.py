@@ -45,8 +45,8 @@ class ReadData():
 
     def create_dataLoader(self, dataroot, image_size):
         """
-
-        Create an return a Data Loader:
+        Read all imagens from the folder and convert them in lab space,
+        as result a Data Loader as created and returned:
 
         dataroot: Path to the images
         Image_size: Dimension of the images (Images must by a sauqre)

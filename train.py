@@ -18,4 +18,14 @@ dataloader = dataLoader.create_dataLoader(dataroot, image_size)
 #Example image
 img_example = dataLoader.img_example(dataloader)
 img_example
-print("sucess")
+print(f"sucess dataloader: {img_example.size}")
+
+
+# instance the model
+import encoder as enc
+import model as mdl
+
+# model = enc.Enconder()
+model = mdl.ViT_UNet()
+print(type(model))
+print(model(next(iter(dataloader))[0]).shape)
